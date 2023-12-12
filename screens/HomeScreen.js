@@ -8,7 +8,14 @@ const HomeScreen = ({ navigation }) => {
         title="Ir a la Billetera"
         onPress={() => navigation.navigate('Billetera')}
       />
+
+<Button
+        title="Configuracion"
+        onPress={() => navigation.navigate('Configuracion')}
+      />
     </View>
+
+    
   );
 };
 
