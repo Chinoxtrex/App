@@ -1,13 +1,15 @@
+// HomeScreen.js
 import React from 'react';
-import { View, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
 
 const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <Button
-        title="Ir a la Billetera"
-        onPress={() => navigation.navigate('Billetera')}
-      />
+      <Text>  videos (pantalla aldo)</Text>
+
+     
+
+    
     </View>
   );
 };
