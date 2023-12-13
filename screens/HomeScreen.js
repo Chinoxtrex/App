@@ -1,25 +1,16 @@
-// HomeScreen.js
+// Home.js
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Button } from 'react-native';
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, route }) => {
+  const { userData } = route.params || {};
+
   return (
-    <View style={styles.container}>
-      <Text>  videos (pantalla aldo)</Text>
-
+    <View>
+      {/* Otros componentes de Home */}
      
-
-    
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default HomeScreen;
