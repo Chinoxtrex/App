@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { collection, addDoc, getFirestore } from 'firebase/firestore';
-import { firebaseApp } from '../firebaseConfig';
+import { firebaseApp, firebaseConfig } from '../firebaseConfig';
 
 const Registro = ({ navigation }) => {
   const [nombre, setNombre] = useState('');
@@ -12,6 +12,11 @@ const Registro = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const firestore = getFirestore(firebaseApp);
 
+  const generarNombreUsuario = () => {
+    const numeroAleatorio = Math.floor(Math.random() * 1000);
+    return `anon${numeroAleatorio}`;
+  };
+
   const handleRegistro = async () => {
     const auth = getAuth(firebaseApp);
 
@@ -20,6 +25,9 @@ const Registro = ({ navigation }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
 
+      // Generar nombre de usuario
+      const nombreUsuario = generarNombreUsuario();
+
       // Guardar datos del usuario en Firestore
       await addDoc(collection(firestore, 'usuarios'), {
         userId,
@@ -27,12 +35,13 @@ const Registro = ({ navigation }) => {
         apellido,
         numero,
         email,
+        nombreUsuario,
       });
 
       console.log('Usuario registrado con éxito');
 
-      // Después de un registro exitoso, navega al HomeScreen pasando solo el userId
-      navigation.navigate('Home', { screen: 'Perfil', params: { userId } });
+      // Después de un registro exitoso, navega al HomeScreen
+      navigation.navigate('Home', { screen: 'Perfil', params: { userId, email } });
     } catch (error) {
       console.error('Error al registrar el usuario', error.message);
     }

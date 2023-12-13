@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const Configuracion = ({ navigation }) => {
+const EditarPerfil = ({ navigation }) => {
   // Datos para la lista de opciones
   const opciones = [
-    { id: '1', texto: 'Billetera', icono: 'money', pantalla: 'Billetera' },
+    { id: '1', texto: 'Billetera', icono: 'money', pantalla: 'Pantalla1' },
     { id: '2', texto: 'Información de la cuenta', icono: 'info-circle', pantalla: 'Pantalla2' },
     { id: '3', texto: 'Privacidad', icono: 'user-secret', pantalla: 'Pantalla3' },
     { id: '4', texto: 'Seguridad', icono: 'shield', pantalla: 'Pantalla4' },
@@ -37,8 +37,8 @@ const Configuracion = ({ navigation }) => {
     <ScrollView contentContainerStyle={styles.container}>
 
       <View style={styles.saldoContainer}>
-
-
+        
+        
         <Icon name="money" size={20} color="#000" style={styles.saldoIcono} />
         <Text style={styles.saldoValor}>{usuario.saldo}</Text>
       </View>
@@ -54,8 +54,8 @@ const Configuracion = ({ navigation }) => {
       {/* Lista de opciones */}
       {opciones.map((item) => renderItem({ item }))}
 
-
-
+      
+      
     </ScrollView>
   );
 };
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     position: 'absolute',
-    top: 10,
+    top: 10, 
     right: 5,
   },
   saldoTexto: {
@@ -114,8 +114,8 @@ const styles = StyleSheet.create({
   },
   editarPerfilTexto: {
     fontSize: 14,
-    color: 'blue',
+    color: 'blue', 
   },
 });
 
-export default Configuracion;
+export default EditarPerfil;

@@ -44,7 +44,7 @@ const RecargaSaldo = ({ route, navigation }) => {
           style={styles.amountButton}
         />
         {/* ... Otros botones ... */}
-        
+
       </View>
       <TextInput
         style={styles.input}
@@ -62,7 +62,7 @@ const RecargaSaldo = ({ route, navigation }) => {
       <Text style={styles.saldoTotalLabel}>Saldo Total:</Text>
       <Text style={styles.saldoTotalAmount}>${saldoTotal.toFixed(2)}</Text>
 
-    
+
 
       <Button title="Pagar" onPress={handleRecargarSaldo} />
       <Button title="Cancelar" onPress={() => navigation.goBack()} />

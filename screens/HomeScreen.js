@@ -7,7 +7,7 @@ const HomeScreen = ({ navigation, route }) => {
 
   return (
     <View>
-<Text>Hola</Text>     
+      <Text>Hola</Text>
     </View>
   );
 };

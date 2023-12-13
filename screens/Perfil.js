@@ -1,10 +1,9 @@
-// Perfil.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import firebaseApp from '../firebaseConfig';
 
-const Perfil = ({ route }) => {
+const Perfil = ({ route, navigation }) => {
   const { userId } = route.params || {};
   const [userData, setUserData] = useState({});
 
@@ -35,6 +34,16 @@ const Perfil = ({ route }) => {
     obtenerDatosUsuario();
   }, [userId]);
 
+  const handleEditarPerfil = () => {
+    // Navegar a la pantalla de Edición de Perfil
+    navigation.navigate('EditarPerfil', { userId });
+  };
+
+  const handleConfiguracion = () => {
+    // Navegar a la pantalla de Configuración
+    navigation.navigate('Configuracion', { userId });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Perfil</Text>
@@ -50,10 +59,13 @@ const Perfil = ({ route }) => {
         <Text style={styles.label}>Número:</Text>
         <Text style={styles.value}>{userData.numero}</Text>
       </View>
+
+      {/* Botones para navegar a Editar Perfil y Configuración */}
+      <Button title="Editar Perfil" onPress={handleEditarPerfil} />
+      <Button title="Configuración" onPress={handleConfiguracion} />
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

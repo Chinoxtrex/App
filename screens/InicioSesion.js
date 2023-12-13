@@ -28,7 +28,7 @@ const InicioSesion = ({ navigation }) => {
 
       // Verifica si se encontraron resultados y navega a la pantalla de perfil
       if (querySnapshot.size > 0) {
-        navigation.navigate('Home', { screen: 'Perfil', params: { userId : user.uid } });
+        navigation.navigate('Home', { screen: 'Perfil', params: { userId: user.uid } });
 
       } else {
         console.log('No se encontraron datos para el usuario con el userId:', user.uid);
