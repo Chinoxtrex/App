@@ -9,6 +9,7 @@ import Configuracion from './screens/Configuracion';
 import Registro from './screens/Registro';
 import InicioSesion from './screens/InicioSesion';
 import Perfil from './screens/Perfil';
+import SearchScreen from './screens/SearchScreen';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -24,6 +25,7 @@ const App = () => {
         <Stack.Screen name="RecargaSaldo" component={RecargaSaldo} />
         <Stack.Screen name="Perfil" component={Perfil} />
         <Stack.Screen name="Configuracion" component={Configuracion} />
+        <Stack.Screen name="SearchScreen" component={SearchScreen} />
 
 
         
@@ -35,8 +37,10 @@ const App = () => {
 const HomeTabs = () => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="HomeScreen" component={HomeScreen} />
       <Tab.Screen name="Perfil" component={Perfil} />
+      <Tab.Screen name="SearchScreen" component={SearchScreen} />
+
     </Tab.Navigator>
   );
 };
