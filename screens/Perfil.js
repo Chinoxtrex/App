@@ -47,21 +47,15 @@ const Perfil = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Perfil</Text>
+     
+  
+     
       <View style={styles.infoContainer}>
-        <Text style={styles.label}>Nombre:</Text>
-        <Text style={styles.value}>{userData.nombre}</Text>
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Apellido:</Text>
-        <Text style={styles.value}>{userData.apellido}</Text>
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Número:</Text>
-        <Text style={styles.value}>{userData.numero}</Text>
+        <Text style={styles.label}>nombre usuario:</Text>
+        <Text style={styles.value}>{userData.nombreUsuario}</Text>
       </View>
 
       {/* Botones para navegar a Editar Perfil y Configuración */}
-      <Button title="Editar Perfil" onPress={handleEditarPerfil} />
       <Button title="Configuración" onPress={handleConfiguracion} />
     </View>
   );

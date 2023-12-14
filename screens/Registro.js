@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { collection, addDoc, getFirestore } from 'firebase/firestore';
-import { firebaseApp, firebaseConfig } from '../firebaseConfig';
+import { firebaseApp } from '../firebaseConfig';
 
 const Registro = ({ navigation }) => {
   const [nombre, setNombre] = useState('');
@@ -28,6 +28,9 @@ const Registro = ({ navigation }) => {
       // Generar nombre de usuario
       const nombreUsuario = generarNombreUsuario();
 
+      // Añadir el campo saldoUsuario con un valor inicial
+      const saldoInicial = 0;
+
       // Guardar datos del usuario en Firestore
       await addDoc(collection(firestore, 'usuarios'), {
         userId,
@@ -36,6 +39,7 @@ const Registro = ({ navigation }) => {
         numero,
         email,
         nombreUsuario,
+        saldoUsuario: saldoInicial,
       });
 
       console.log('Usuario registrado con éxito');

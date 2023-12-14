@@ -1,6 +1,8 @@
-// Billetera.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, doc, updateDoc, query, where, getDocs } from 'firebase/firestore';
+import firebaseApp from '../firebaseConfig';
 
 const Billetera = ({ route, navigation }) => {
   const [saldo, setSaldo] = useState(route.params?.nuevoSaldo || 0);
@@ -10,6 +12,28 @@ const Billetera = ({ route, navigation }) => {
       setSaldo(route.params.nuevoSaldo);
     }
   }, [route.params?.nuevoSaldo]);
+
+  const recargarSaldo = async () => {
+    try {
+      // Obtén la instancia de autenticación y la base de datos
+      const auth = getAuth(firebaseApp);
+      const db = getFirestore(firebaseApp);
+
+      // Obtén el ID del usuario actual
+      const userId = auth.currentUser.uid;
+
+      // Actualiza el saldo en Firestore
+      const usuarioDocRef = doc(db, 'usuarios', userId);
+      await updateDoc(usuarioDocRef, {
+        saldoUsuario: saldo + 100, // Supongamos que se recargan $100
+      });
+
+      // Después de actualizar el saldo, navega a la pantalla de configuración
+      navigation.navigate('Configuracion');
+    } catch (error) {
+      console.error('Error al recargar saldo', error.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -21,7 +45,7 @@ const Billetera = ({ route, navigation }) => {
       <View style={styles.buttonContainer}>
         <Button
           title="Recargar Saldo"
-          onPress={() => navigation.navigate('RecargaSaldo', { saldoAnterior: saldo })}
+          onPress={recargarSaldo}
         />
       </View>
     </View>

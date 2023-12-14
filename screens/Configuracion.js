@@ -1,9 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import firebaseApp from '../firebaseConfig';
 
 const Configuracion = ({ navigation }) => {
-  // Datos para la lista de opciones
+  const [usuario, setUsuario] = useState({
+    nombre: '',
+    fotoPerfil: 'https://static.wikia.nocookie.net/los-simpsom/images/4/4a/Homero-simpson-2.jpg/revision/latest?cb=20130413015655&path-prefix=es',
+    saldo: '$0.00',
+  });
+
+  useEffect(() => {
+    const obtenerDatosUsuario = async () => {
+      try {
+        // Obtén la instancia de la autenticación y la base de datos
+        const auth = getAuth(firebaseApp);
+        const db = getFirestore(firebaseApp);
+
+        // Obtén el ID del usuario actual
+        const userId = auth.currentUser.uid;
+
+        // Realiza una consulta para obtener el documento del usuario actual
+        const q = query(collection(db, 'usuarios'), where('userId', '==', userId));
+        const querySnapshot = await getDocs(q);
+
+        // Verifica si se encontraron resultados y actualiza el estado
+        if (querySnapshot.size > 0) {
+          querySnapshot.forEach((doc) => {
+            const { nombre, fotoPerfil, saldoUsuario } = doc.data();
+            setUsuario({
+              nombre,
+              fotoPerfil,
+              saldo: `$${saldoUsuario.toFixed(2)}`,
+            });
+          });
+        } else {
+          console.log('No se encontraron datos para el usuario con el userId:', userId);
+        }
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario', error.message);
+      }
+    };
+
+    // Llama a la función para obtener los datos del usuario cuando el componente se monta
+    obtenerDatosUsuario();
+  }, []);
+
   const opciones = [
     { id: '1', texto: 'Billetera', icono: 'money', pantalla: 'Billetera' },
     { id: '2', texto: 'Información de la cuenta', icono: 'info-circle', pantalla: 'Pantalla2' },
@@ -20,12 +64,6 @@ const Configuracion = ({ navigation }) => {
     { id: '13', texto: 'Cerrar sesión', icono: 'sign-out', pantalla: 'Pantalla13' },
   ];
 
-  const usuario = {
-    nombre: 'Alexis',
-    fotoPerfil: 'https://static.wikia.nocookie.net/los-simpsom/images/4/4a/Homero-simpson-2.jpg/revision/latest?cb=20130413015655&path-prefix=es', // Puedes usar la URL de la imagen o importarla localmente
-    saldo: '$10000.00', // Supongamos que el saldo es de $100.00
-  };
-
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.opcionContainer} onPress={() => navigation.navigate(item.pantalla)}>
       <Icon name={item.icono} size={20} color="#000" style={styles.icono} />
@@ -35,27 +73,24 @@ const Configuracion = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-
+      {/* Sección de foto de portada */}
+      <Image
+        source={{ uri: 'https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg?size=626&ext=jpg&ga=GA1.1.1413502914.1697414400&semt=ais' }}
+        style={styles.fotoPortada}
+      />
+      {/* Resto del contenido */}
       <View style={styles.saldoContainer}>
-
-
         <Icon name="money" size={20} color="#000" style={styles.saldoIcono} />
         <Text style={styles.saldoValor}>{usuario.saldo}</Text>
       </View>
-      {/* Sección de foto de perfil */}
       <View style={styles.perfilContainer}>
         <Image source={{ uri: usuario.fotoPerfil }} style={styles.fotoPerfil} />
         <Text style={styles.nombreUsuario}>{usuario.nombre}</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('EditarPerfil')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Editarperfil')}>
           <Text style={styles.editarPerfilTexto}>(Editar Perfil)</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Lista de opciones */}
       {opciones.map((item) => renderItem({ item }))}
-
-
-
     </ScrollView>
   );
 };
@@ -66,9 +101,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 20,
   },
+  fotoPortada: {
+    width: '100%', // O ajusta según tus necesidades
+    height: 200, // O ajusta según tus necesidades
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: -1,
+  },
   perfilContainer: {
     alignItems: 'center',
     marginBottom: 20,
+    marginTop: -10, // Ajusta según tus necesidades
   },
   fotoPerfil: {
     width: 100,
@@ -79,6 +124,10 @@ const styles = StyleSheet.create({
   nombreUsuario: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#000000', // Cambia el color según tu diseño
+    backgroundColor: 'rgba(255, 255, 255, 0.6)', // Ajusta el color y la opacidad según tus necesidades
+    padding: 5, // Ajusta según tus necesidades
+    borderRadius: 15, // Ajusta según tus necesidades
   },
   opcionContainer: {
     flexDirection: 'row',
@@ -100,6 +149,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)', // Ajusta el color y la opacidad según tus necesidades
+    padding: 10, // Ajusta según tus necesidades
+    borderRadius: 10, // Ajusta según tus necesidades
   },
   saldoTexto: {
     fontSize: 16,
@@ -115,6 +167,9 @@ const styles = StyleSheet.create({
   editarPerfilTexto: {
     fontSize: 14,
     color: 'blue',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Ajusta el color y la opacidad según tus necesidades
+    padding: 5, // Ajusta según tus necesidades
+    borderRadius: 15, // Ajusta según tus necesidades
   },
 });
 

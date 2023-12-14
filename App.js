@@ -40,8 +40,6 @@ const HomeTabs = () => {
       <Tab.Screen name="HomeScreen" component={HomeScreen} />
       <Tab.Screen name="SearchScreen" component={SearchScreen} />
       <Tab.Screen name="Perfil" component={Perfil} />
-
-
     </Tab.Navigator>
   );
 };
