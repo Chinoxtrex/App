@@ -8,7 +8,7 @@ import firebaseApp from '../firebaseConfig';
 const Configuracion = ({ navigation }) => {
   const [usuario, setUsuario] = useState({
     nombre: '',
-    fotoPerfil: 'https://static.wikia.nocookie.net/los-simpsom/images/4/4a/Homero-simpson-2.jpg/revision/latest?cb=20130413015655&path-prefix=es',
+    fotoPerfil: '',
     saldo: '$0.00',
   });
 
@@ -86,7 +86,7 @@ const Configuracion = ({ navigation }) => {
       <View style={styles.perfilContainer}>
         <Image source={{ uri: usuario.fotoPerfil }} style={styles.fotoPerfil} />
         <Text style={styles.nombreUsuario}>{usuario.nombre}</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Editarperfil')}>
+        <TouchableOpacity onPress={() => navigation.navigate('EditarPerfil')}>
           <Text style={styles.editarPerfilTexto}>(Editar Perfil)</Text>
         </TouchableOpacity>
       </View>

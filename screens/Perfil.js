@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Button, Image } from 'react-native';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import firebaseApp from '../firebaseConfig';
 
@@ -34,28 +34,29 @@ const Perfil = ({ route, navigation }) => {
     obtenerDatosUsuario();
   }, [userId]);
 
-  const handleEditarPerfil = () => {
-    // Navegar a la pantalla de Edición de Perfil
-    navigation.navigate('EditarPerfil', { userId });
-  };
-
   const handleConfiguracion = () => {
     // Navegar a la pantalla de Configuración
-    navigation.navigate('Configuracion', { userId });
+    navigation.navigate('Configuracion',  { userId });
   };
 
   return (
     <View style={styles.container}>
+      {/* Ovalo con fondo rojo para foto de perfil */}
+      <View style={styles.fotoContainer}>
+        {userData.fotoPerfil && (
+          <Image source={{ uri: userData.fotoPerfil }} style={styles.fotoPerfil} />
+        )}
+      </View>
+
       <Text style={styles.title}>Perfil</Text>
-     
-  
-     
+
+      {/* Nombre de usuario */}
       <View style={styles.infoContainer}>
-        <Text style={styles.label}>nombre usuario:</Text>
+        <Text style={styles.label}>Nombre usuario:</Text>
         <Text style={styles.value}>{userData.nombreUsuario}</Text>
       </View>
 
-      {/* Botones para navegar a Editar Perfil y Configuración */}
+      {/* Botones para navegar a Configuración */}
       <Button title="Configuración" onPress={handleConfiguracion} />
     </View>
   );
@@ -82,6 +83,19 @@ const styles = StyleSheet.create({
   },
   value: {
     flex: 1,
+  },
+  fotoContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'red', // Fondo rojo para el óvalo
+    overflow: 'hidden', // Oculta el contenido que sobresale del óvalo
+    marginBottom: 20,
+  },
+  fotoPerfil: {
+    flex: 1,
+    width: undefined,
+    height: undefined,
   },
 });
 

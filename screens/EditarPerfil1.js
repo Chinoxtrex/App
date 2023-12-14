@@ -8,52 +8,49 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import firebaseApp from '../firebaseConfig';
 
-const EditarPerfil = () => {
-  const navigation = useNavigation();
-  
-  const [usuario, setUsuario] = useState({
-    nombre: '',
-    apellido: '',
-    urlPerfil: 'www.user.com',
-    fotoPerfil: 'https://static.wikia.nocookie.net/los-simpsom/images/4/4a/Homero-simpson-2.jpg/revision/latest?cb=20130413015655&path-prefix=es',
-  }); 
+const Editarperfil = ({ navigation }) => {
+    const [usuario, setUsuario] = useState({
+      nombre: '',
+      apellido: '',
+    });
+    useEffect(() => {
+        const obtenerDatosUsuario = async () => {
+          try {
+            // Obtén la instancia de la autenticación y la base de datos
+            const auth = getAuth(firebaseApp);
+            const db = getFirestore(firebaseApp);
+    
+            // Obtén el ID del usuario actual
+            const userId = auth.currentUser.uid;
+    
+            // Realiza una consulta para obtener el documento del usuario actual
+            const q = query(collection(db, 'usuarios'), where('userId', '==', userId));
+            const querySnapshot = await getDocs(q);
+    
+            // Verifica si se encontraron resultados y actualiza el estado
+            if (querySnapshot.size > 0) {
+              querySnapshot.forEach((doc) => {
+                const { nombre, fotoPerfil, saldoUsuario } = doc.data();
+                setUsuario({
+                  nombre,
+                  apellido,
+                 
+                });
+              });
+            } else {
+              console.log('No se encontraron datos para el usuario con el userId:', userId);
+            }
+          } catch (error) {
+            console.error('Error al obtener los datos del usuario', error.message);
+          }
+        };
+    
+        // Llama a la función para obtener los datos del usuario cuando el componente se monta
+        obtenerDatosUsuario();
+      }, []);
 
-  const [fotoPortada, setFotoPortada] = useState('https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg?size=626&ext=jpg&ga=GA1.1.1413502914.1697414400&semt=ais');
-  const [fotoPerfil, setFotoPerfil] = useState(usuario.fotoPerfil);
-  const [mostrarEnGrande, setMostrarEnGrande] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [descripcion, setDescripcion] = useState('');
-const obtenerDatosUsuario = async () => {
-    try {
-      // Obtén la instancia de la autenticación y la base de datos
-      const auth = getAuth(firebaseApp);
-      const db = getFirestore(firebaseApp);
-
-      // Obtén el ID del usuario actual
-      const userId = auth.currentUser.uid;
-
-      // Realiza una consulta para obtener el documento del usuario actual
-      const q = query(collection(db, 'usuarios'), where('userId', '==', userId));
-      const querySnapshot = await getDocs(q);
-
-      // Verifica si se encontraron resultados y actualiza el estado
-      if (querySnapshot.size > 0) {
-        querySnapshot.forEach((doc) => {
-          const { nombre, apellido, urlPerfil, fotoPerfil } = doc.data();
-          setUsuario({
-            nombre,
-            apellido,
-            urlPerfil,
-            fotoPerfil,
-          });
-        });
-      } else {
-        console.log('No se encontraron datos para el usuario con el userId:', userId);
-      }
-    } catch (error) {
-      console.error('Error al obtener los datos del usuario', error.message);
-    }
-  };
+      const [mostrarEnGrande, setMostrarEnGrande] = useState(false);
+      const [modalVisible, setModalVisible] = useState(false);
   const abrirGaleria = async () => {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -65,7 +62,7 @@ const obtenerDatosUsuario = async () => {
 
       const pickerResult = await ImagePicker.launchImageLibraryAsync();
 
-      if (!pickerResult.cancelled) {
+      if (!pickerResult.canceled) {
         setFotoPortada(pickerResult.uri);
       }
     } catch (error) {
@@ -84,7 +81,7 @@ const obtenerDatosUsuario = async () => {
 
       const pickerResult = await ImagePicker.launchImageLibraryAsync();
 
-      if (!pickerResult.cancelled) {
+      if (!pickerResult.canceled) {
         setFotoPerfil(pickerResult.uri);
       }
     } catch (error) {
@@ -103,7 +100,7 @@ const obtenerDatosUsuario = async () => {
           quality: 1,
         });
   
-        if (!foto.cancelled) {
+        if (!foto.canceled) {
           setFotoPerfil(foto.uri);
         }
       } else {
@@ -153,20 +150,14 @@ const obtenerDatosUsuario = async () => {
   };
 
   useEffect(() => {
-    obtenerDatosUsuario();
-
+    // Puedes agregar aquí la inicialización de tu componente si es necesario
   }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Sección de foto de portada */}
       <TouchableOpacity onPress={abrirGaleria}>
-        <Image
-          source={{
-            uri: fotoPortada,
-          }}
-          style={styles.portada}
-        />
+       
         {/* Texto para editar foto de portada */}
         <View style={styles.editarPortadaTextoContainer}>
           <Text style={styles.editarPortadaTexto}>Editar foto de portada</Text>
@@ -175,7 +166,7 @@ const obtenerDatosUsuario = async () => {
       {/* Sección de foto de perfil */}
       <View style={styles.fotoPerfilContainer}>
         <TouchableOpacity onPress={mostrarOpcionesFotoPerfil}>
-          <Image source={{ uri: fotoPerfil }} style={styles.fotoPerfil} />
+         
           <Text style={styles.editarTexto}>Editar foto de perfil</Text>
         </TouchableOpacity>
       </View>
@@ -216,7 +207,7 @@ const obtenerDatosUsuario = async () => {
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>URL de perfil</Text>
           <TouchableOpacity onPress={() => editarElemento('urlPerfil')}>
-            <Text style={styles.infoValor}>{usuario.urlPerfil}</Text>
+            <Text style={styles.infoValor}>aun nada</Text>
           </TouchableOpacity>
           <Ionicons
             name="copy"
@@ -231,20 +222,18 @@ const obtenerDatosUsuario = async () => {
 
       {/* Formulario de edición de perfil */}
       <View style={styles.formularioContainer}>
-        <View style={styles.formularioItem}>
-          <Text style={styles.formularioLabel}>Descripción</Text>
-          <TextInput
-            style={styles.formularioInput}
-            multiline
-            numberOfLines={4}
-            value={descripcion}
-            onChangeText={(text) => setDescripcion(text)}
-          />
-        </View>
-        <TouchableOpacity onPress={guardarDescripcion} style={styles.botonGuardar}>
-          <Text style={styles.botonGuardarTexto}>Guardar</Text>
-        </TouchableOpacity>
-      </View>
+  <View style={styles.formularioItem}>
+    <Text style={styles.formularioLabel}>Descripción</Text>
+    <TextInput
+      style={styles.formularioInput}
+      multiline
+      numberOfLines={4}
+    />
+  </View>
+  <TouchableOpacity onPress={guardarDescripcion} style={styles.botonGuardar}>
+    <Text style={styles.botonGuardarTexto}>Guardar</Text>
+  </TouchableOpacity>
+</View>
 
       <View style={styles.redesSocialesContainer}>
       <Text style={styles.txtsocial}>Vincular cuentas</Text>
@@ -286,10 +275,7 @@ const obtenerDatosUsuario = async () => {
           onRequestClose={() => setMostrarEnGrande(false)}
         >
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Image
-              source={{ uri: fotoPerfil }}
-              style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
-            />
+           
             <TouchableOpacity
               onPress={() => setMostrarEnGrande(false)}
               style={{ position: 'absolute', top: 20, right: 20 }}
@@ -461,4 +447,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default EditarPerfil;
+export default Editarperfil;
