@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { collection, addDoc, getFirestore } from 'firebase/firestore';
+import { collection, addDoc, getFirestore, doc, setDoc } from 'firebase/firestore';
 import { firebaseApp } from '../firebaseConfig';
 
 const Registro = ({ navigation }) => {
@@ -21,18 +21,17 @@ const Registro = ({ navigation }) => {
     const auth = getAuth(firebaseApp);
 
     try {
-      // Registrar usuario en Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
 
-      // Generar nombre de usuario
       const nombreUsuario = generarNombreUsuario();
 
-      // Añadir el campo saldoUsuario con un valor inicial
       const saldoInicial = 0;
 
-      // Guardar datos del usuario en Firestore
-      await addDoc(collection(firestore, 'usuarios'), {
+      const userDocRef = doc(firestore, 'usuarios', userId);
+      
+      const urlFotoPerfilInicial = '';
+      await setDoc(userDocRef, {
         userId,
         nombre,
         apellido,
@@ -40,6 +39,7 @@ const Registro = ({ navigation }) => {
         email,
         nombreUsuario,
         saldoUsuario: saldoInicial,
+        urlFotoPerfil: urlFotoPerfilInicial,
       });
 
       console.log('Usuario registrado con éxito');

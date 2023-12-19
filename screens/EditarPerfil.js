@@ -1,120 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, TextInput } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import * as Camera from 'expo-camera';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TextInput, Button, StyleSheet, Image, TouchableOpacity, Modal } from 'react-native';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
-import firebaseApp from '../firebaseConfig';
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import * as ImagePicker from 'expo-image-picker';
+import { Camera } from 'expo-camera';
 
 const EditarPerfil = () => {
-  const navigation = useNavigation();
-  
   const [usuario, setUsuario] = useState({
     nombre: '',
     apellido: '',
-    urlPerfil: 'www.user.com',
-    fotoPerfil: 'https://static.wikia.nocookie.net/los-simpsom/images/4/4a/Homero-simpson-2.jpg/revision/latest?cb=20130413015655&path-prefix=es',
-  }); 
+    fotoPerfil: '',
+  });
 
-  const [fotoPortada, setFotoPortada] = useState('https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg?size=626&ext=jpg&ga=GA1.1.1413502914.1697414400&semt=ais');
-  const [fotoPerfil, setFotoPerfil] = useState(usuario.fotoPerfil);
-  const [mostrarEnGrande, setMostrarEnGrande] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [descripcion, setDescripcion] = useState('');
-const obtenerDatosUsuario = async () => {
-    try {
-      // Obtén la instancia de la autenticación y la base de datos
-      const auth = getAuth(firebaseApp);
-      const db = getFirestore(firebaseApp);
+  const [cameraPermission, setCameraPermission] = useState(null);
 
-      // Obtén el ID del usuario actual
-      const userId = auth.currentUser.uid;
+  useEffect(() => {
+    const obtenerDatosUsuario = async () => {
+      try {
+        const auth = getAuth();
+        const db = getFirestore();
+        const userId = auth.currentUser.uid;
+        const q = query(collection(db, 'usuarios'), where('userId', '==', userId));
+        const querySnapshot = await getDocs(q);
 
-      // Realiza una consulta para obtener el documento del usuario actual
-      const q = query(collection(db, 'usuarios'), where('userId', '==', userId));
-      const querySnapshot = await getDocs(q);
-
-      // Verifica si se encontraron resultados y actualiza el estado
-      if (querySnapshot.size > 0) {
-        querySnapshot.forEach((doc) => {
-          const { nombre, apellido, urlPerfil, fotoPerfil } = doc.data();
-          setUsuario({
-            nombre,
-            apellido,
-            urlPerfil,
-            fotoPerfil,
+        if (querySnapshot.size > 0) {
+          querySnapshot.forEach((doc) => {
+            const { nombre, apellido, fotoPerfil } = doc.data();
+            setUsuario({
+              nombre,
+              apellido,
+              fotoPerfil,
+            });
           });
-        });
-      } else {
-        console.log('No se encontraron datos para el usuario con el userId:', userId);
-      }
-    } catch (error) {
-      console.error('Error al obtener los datos del usuario', error.message);
-    }
-  };
-  const abrirGaleria = async () => {
-    try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (permissionResult.granted === false) {
-        alert('Permiso para acceder a la galería de fotos denegado');
-        return;
-      }
-
-      const pickerResult = await ImagePicker.launchImageLibraryAsync();
-
-      if (!pickerResult.cancelled) {
-        setFotoPortada(pickerResult.uri);
-      }
-    } catch (error) {
-      console.error('Error al abrir la galería:', error);
-    }
-  };
-
-  const abrirGaleria2 = async () => {
-    try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (permissionResult.granted === false) {
-        alert('Permiso para acceder a la galería de fotos denegado');
-        return;
-      }
-
-      const pickerResult = await ImagePicker.launchImageLibraryAsync();
-
-      if (!pickerResult.cancelled) {
-        setFotoPerfil(pickerResult.uri);
-      }
-    } catch (error) {
-      console.error('Error al abrir la galería:', error);
-    }
-  };
-
-  const abrirCamara = async () => {
-    try {
-      const { status } = await Camera.requestPermissionsAsync();
-  
-      if (status === 'granted') {
-        const foto = await ImagePicker.launchCameraAsync({
-          allowsEditing: true,
-          aspect: [4, 3],
-          quality: 1,
-        });
-  
-        if (!foto.cancelled) {
-          setFotoPerfil(foto.uri);
+        } else {
+          console.log('No se encontraron datos para el usuario con el userId:', userId);
         }
-      } else {
-        alert('Permiso para acceder a la cámara denegado');
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario', error.message);
       }
+    };
+
+    obtenerDatosUsuario();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setCameraPermission(status === 'granted');
+    })();
+  }, []);
+
+  const guardarCambios = async () => {
+    try {
+      const auth = getAuth();
+      const db = getFirestore();
+      const userId = auth.currentUser.uid;
+      const userDocRef = doc(db, 'usuarios', userId);
+      await updateDoc(userDocRef, {
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        fotoPerfil: usuario.fotoPerfil,
+      });
+
+      alert('Cambios guardados correctamente');
     } catch (error) {
-      console.error('Error al abrir la cámara:', error);
+      console.error('Error al guardar cambios', error.message);
     }
   };
 
-  const mostrarOpcionesFotoPerfil = () => {
+  const abrirModal = () => {
     setModalVisible(true);
   };
 
@@ -122,155 +78,114 @@ const obtenerDatosUsuario = async () => {
     setModalVisible(false);
   };
 
-  const seleccionarOpcion = (opcion) => {
-    cerrarModal();
-    switch (opcion) {
-      case 'Tomar foto':
-        abrirCamara();
-        break;
-      case 'Subir foto':
-        abrirGaleria2();
-        break;
-      case 'Ver foto':
-        setMostrarEnGrande(true);
-        break;
-      default:
-        console.log('Cancelar');
+  const seleccionarFoto = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (permissionResult.granted === false) {
+        alert('Permiso para acceder a la galería de fotos denegado');
+        return;
+      }
+
+      const pickerResult = await ImagePicker.launchImageLibraryAsync();
+
+      if (!pickerResult.canceled) {
+        // Accede a la foto a través de 'assets' en lugar de 'uri'
+        subirFoto(pickerResult.assets[0].uri || pickerResult.assets[0]?.file?.uri);
+      }
+
+      cerrarModal();
+    } catch (error) {
+      console.error('Error al abrir la galería:', error);
     }
   };
 
-  const editarElemento = (elemento) => {
-    // Navegar a la pantalla de edición según el elemento seleccionado
-    navigation.navigate('EditarPerfil', { elemento });
+  const tomarFoto = async () => {
+    try {
+      if (!cameraPermission) {
+        alert('Permiso para acceder a la cámara denegado');
+        return;
+      }
+
+      const foto = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!foto.canceled) {
+        subirFoto(foto.uri);
+      }
+
+      cerrarModal();
+    } catch (error) {
+      console.error('Error al abrir la cámara:', error);
+    }
   };
 
-  const guardarDescripcion = () => {
-    // Aquí puedes implementar la lógica para guardar la descripción en tu base de datos
-    // Por ejemplo, puedes usar Firebase, Axios, etc.
-  
-    // Después de guardar, puedes mostrar un mensaje de éxito o realizar otras acciones.
-    alert('Descripción guardada correctamente');
+
+
+  const subirFoto = async (uri) => {
+    try {
+      const storage = getStorage();
+      const auth = getAuth();
+      const userId = auth.currentUser.uid;
+      const storageRef = ref(storage, `fotosPerfil/${userId}`);
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const uploadTask = uploadBytesResumable(storageRef, blob);
+      const snapshot = await uploadTask;
+      const url = await getDownloadURL(snapshot.ref);
+      const db = getFirestore();
+      const userDocRef = doc(db, 'usuarios', userId);
+      await updateDoc(userDocRef, { fotoPerfil: url });
+      setUsuario((prevUsuario) => ({
+        ...prevUsuario,
+        fotoPerfil: url,
+      }));
+    } catch (error) {
+      console.error('Error al subir la foto de perfil', error.message);
+    }
   };
 
-  useEffect(() => {
-    obtenerDatosUsuario();
 
-  }, []);
+
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Sección de foto de portada */}
-      <TouchableOpacity onPress={abrirGaleria}>
-        <Image
-          source={{
-            uri: fotoPortada,
-          }}
-          style={styles.portada}
-        />
-        {/* Texto para editar foto de portada */}
-        <View style={styles.editarPortadaTextoContainer}>
-          <Text style={styles.editarPortadaTexto}>Editar foto de portada</Text>
+    <View style={styles.container}>
+      <TouchableOpacity onPress={abrirModal}>
+        <View style={styles.fotoPerfilContainer}>
+          {usuario.fotoPerfil ? (
+            <Image source={{ uri: usuario.fotoPerfil }} style={styles.fotoPerfil} />
+          ) : (
+            <Text>Subir foto de perfil</Text>
+          )}
         </View>
       </TouchableOpacity>
-      {/* Sección de foto de perfil */}
-      <View style={styles.fotoPerfilContainer}>
-        <TouchableOpacity onPress={mostrarOpcionesFotoPerfil}>
-          <Image source={{ uri: fotoPerfil }} style={styles.fotoPerfil} />
-          <Text style={styles.editarTexto}>Editar foto de perfil</Text>
-        </TouchableOpacity>
-      </View>
-      {/* Resto del perfil */}
-      <View style={styles.infoContainer}>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Nombre</Text>
-          <TouchableOpacity onPress={() => editarElemento('nombre')}>
-            <Text style={styles.infoValor}>{usuario.nombre}</Text>
-          </TouchableOpacity>
-          <Ionicons
-            name="pencil-outline"
-            size={20}
-            color="black"
-            style={styles.iconoLapiz}
-            onPress={() => editarElemento('nombre')}
-          />
-        </View>
 
-        <View style={styles.lineaDivisoria}></View>
+      <Text style={styles.title}>Edita tu Perfil</Text>
+      <TextInput
+        placeholder="Nombre"
+        value={usuario.nombre}
+        onChangeText={(text) => setUsuario({ ...usuario, nombre: text })}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Apellido"
+        value={usuario.apellido}
+        onChangeText={(text) => setUsuario({ ...usuario, apellido: text })}
+        style={styles.input}
+      />
+      <Button title="Guardar Cambios" onPress={guardarCambios} />
 
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Apellido</Text>
-          <TouchableOpacity onPress={() => editarElemento('apellido')}>
-            <Text style={styles.infoValor}>{usuario.apellido}</Text>
-          </TouchableOpacity>
-          <Ionicons
-            name="pencil-outline"
-            size={20}
-            color="black"
-            style={styles.iconoLapiz}
-            onPress={() => editarElemento('apellido')}
-          />
-        </View>
-
-        <View style={styles.lineaDivisoria}></View>
-
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>URL de perfil</Text>
-          <TouchableOpacity onPress={() => editarElemento('urlPerfil')}>
-            <Text style={styles.infoValor}>{usuario.urlPerfil}</Text>
-          </TouchableOpacity>
-          <Ionicons
-            name="copy"
-            size={20}
-            color="black"
-            style={styles.iconoLapiz}
-            onPress={() => editarElemento('urlPerfil')}
-          />
-        </View>
-        <View style={styles.lineaDivisoria}></View>
-      </View>
-
-      {/* Formulario de edición de perfil */}
-      <View style={styles.formularioContainer}>
-        <View style={styles.formularioItem}>
-          <Text style={styles.formularioLabel}>Descripción</Text>
-          <TextInput
-            style={styles.formularioInput}
-            multiline
-            numberOfLines={4}
-            value={descripcion}
-            onChangeText={(text) => setDescripcion(text)}
-          />
-        </View>
-        <TouchableOpacity onPress={guardarDescripcion} style={styles.botonGuardar}>
-          <Text style={styles.botonGuardarTexto}>Guardar</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.redesSocialesContainer}>
-      <Text style={styles.txtsocial}>Vincular cuentas</Text>
-        <Ionicons name="logo-facebook" size={40} color="#1877f2" style={styles.redSocialIcono} />
-        <Ionicons name="logo-youtube" size={40} color="#ff0000" style={styles.redSocialIcono} />
-        <Ionicons name="logo-instagram" size={40} color="#bc2a8d" style={styles.redSocialIcono} />
-        <Ionicons name="logo-google" size={40} color="#4285f4" style={styles.redSocialIcono} />
-      </View>
-
-      {/* Modal de opciones */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={cerrarModal}
-      >
+      <Modal animationType="slide" transparent={false} visible={modalVisible}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <TouchableOpacity onPress={() => seleccionarOpcion('Tomar foto')}>
+            <TouchableOpacity onPress={tomarFoto}>
               <Text style={styles.modalOption}>Tomar foto</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => seleccionarOpcion('Subir foto')}>
-              <Text style={styles.modalOption}>Subir foto</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => seleccionarOpcion('Ver foto')}>
-              <Text style={styles.modalOption}>Ver foto</Text>
+            <TouchableOpacity onPress={seleccionarFoto}>
+              <Text style={styles.modalOption}>Seleccionar foto de la galería</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={cerrarModal}>
               <Text style={styles.modalCancel}>Cancelar</Text>
@@ -278,109 +193,55 @@ const obtenerDatosUsuario = async () => {
           </View>
         </View>
       </Modal>
-
-      <Modal
-          animationType="slide"
-          transparent={false}
-          visible={mostrarEnGrande}
-          onRequestClose={() => setMostrarEnGrande(false)}
-        >
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Image
-              source={{ uri: fotoPerfil }}
-              style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
-            />
-            <TouchableOpacity
-              onPress={() => setMostrarEnGrande(false)}
-              style={{ position: 'absolute', top: 20, right: 20 }}
-            >
-              <Ionicons name="close" size={30} color="black" />
-            </TouchableOpacity>
-          </View>
-        </Modal>
-
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
-  portada: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    padding: 10,
+    width: '80%',
   },
   fotoPerfilContainer: {
-    alignItems: 'center',
-    marginTop: -150,
-  },
-  fotoPerfil: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    right: -15,
-  },
-  editarTexto: {
-    marginTop: 5,
-    color: '#000000',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    padding: 5,
-    borderRadius: 5,
-    right: 0,
-  },
-  infoContainer: {
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginTop: 20,
-
-  },
-  infoItem: {
-    flexDirection: 'row',
+    backgroundColor: '#ccc',
+    marginBottom: 20,
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    
   },
-  infoLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    
-  },
-  infoValor: {
-    fontSize: 16,
-    marginLeft: 8,
-    
-  },
-  iconoLapiz: {
-    marginLeft: -120,
-  },
-  editarPortadaTextoContainer: {
-    position: 'absolute',
-    bottom: 170,
-    right: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    padding: 2,
-    borderRadius: 6,
-  },
-  editarPortadaTexto: {
-    color: '#000000',
-    marginTop: 5,
+  fotoPerfil: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     backgroundColor: '#fff',
-    width: '100%',
+    width: '80%',
     padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 10,
   },
   modalOption: {
     fontSize: 18,
@@ -396,69 +257,6 @@ const styles = StyleSheet.create({
     color: 'red',
     marginTop: 10,
   },
-  formularioContainer: {
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginTop: 20,
-  },
-  formularioTitulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  formularioItem: {
-    marginBottom: 16,
-  },
-  formularioLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  formularioInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 8,
-  },
-
-  lineaDivisoria: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    marginVertical: 10,
-  },
-
-  txtsocial: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-
-  redesSocialesContainer: {
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
-  },
-  redSocialIcono: {
-    margin: 10,
-  },
-
-  botonGuardar: {
-    backgroundColor: '#3498db',
-    paddingVertical: 5,
-    paddingHorizontal: 0,
-    borderRadius: 5,
-    marginTop: 0,
-  },
-  botonGuardarTexto: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  
-
-
 });
 
 export default EditarPerfil;

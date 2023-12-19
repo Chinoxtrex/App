@@ -23,6 +23,19 @@
         "backgroundColor": "#ffffff"
       }
     },
+    "plugins": {
+      "expo-image-picker": {
+        "photoPermission": {
+          "ios": "PHPhotoLibrary",
+          "android": {
+            "title": "Permiso de acceso a fotos",
+            "message": "Necesitamos tu permiso para acceder a tus fotos",
+            "buttonPositive": "Aceptar",
+            "buttonNegative": "Cancelar"
+          }
+        }
+      }
+    },
     "web": {
       "favicon": "./assets/favicon.png"
     }
