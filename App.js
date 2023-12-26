@@ -11,7 +11,7 @@ import InicioSesion from './screens/InicioSesion';
 import Perfil from './screens/Perfil';
 import SearchScreen from './screens/SearchScreen';
 import EditarPerfil from './screens/EditarPerfil';
-
+import CerrarSesion from './screens/cerrarSesion';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -29,6 +29,8 @@ const App = () => {
         <Stack.Screen name="Configuracion" component={Configuracion} />
         <Stack.Screen name="SearchScreen" component={SearchScreen} />
         <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
+        <Stack.Screen name="CerrarSesion" component={CerrarSesion} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

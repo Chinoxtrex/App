@@ -9,30 +9,26 @@ const Configuracion = ({ navigation }) => {
   const [usuario, setUsuario] = useState({
     nombre: '',
     fotoPerfil: '',
+    fotoPortada: '',
     saldo: '$0.00',
   });
 
   useEffect(() => {
     const obtenerDatosUsuario = async () => {
       try {
-        // Obtén la instancia de la autenticación y la base de datos
         const auth = getAuth(firebaseApp);
         const db = getFirestore(firebaseApp);
-
-        // Obtén el ID del usuario actual
         const userId = auth.currentUser.uid;
-
-        // Realiza una consulta para obtener el documento del usuario actual
         const q = query(collection(db, 'usuarios'), where('userId', '==', userId));
         const querySnapshot = await getDocs(q);
 
-        // Verifica si se encontraron resultados y actualiza el estado
         if (querySnapshot.size > 0) {
           querySnapshot.forEach((doc) => {
-            const { nombre, fotoPerfil, saldoUsuario } = doc.data();
+            const { nombre, fotoPerfil, fotoPortada, saldoUsuario } = doc.data();
             setUsuario({
               nombre,
               fotoPerfil,
+              fotoPortada,
               saldo: `$${saldoUsuario.toFixed(2)}`,
             });
           });
@@ -44,7 +40,6 @@ const Configuracion = ({ navigation }) => {
       }
     };
 
-    // Llama a la función para obtener los datos del usuario cuando el componente se monta
     obtenerDatosUsuario();
   }, []);
 
@@ -61,8 +56,9 @@ const Configuracion = ({ navigation }) => {
     { id: '10', texto: 'Estadísticas', icono: 'bar-chart', pantalla: 'Pantalla10' },
     { id: '11', texto: 'Ayuda', icono: 'question-circle', pantalla: 'Pantalla11' },
     { id: '12', texto: 'Términos y condiciones', icono: 'book', pantalla: 'Pantalla12' },
-    { id: '13', texto: 'Cerrar sesión', icono: 'sign-out', pantalla: 'Pantalla13' },
+    { id: '13', texto: 'Cerrar sesión', icono: 'sign-out', pantalla: 'CerrarSesion' },
   ];
+
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.opcionContainer} onPress={() => navigation.navigate(item.pantalla)}>
@@ -73,12 +69,9 @@ const Configuracion = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Sección de foto de portada */}
-      <Image
-        source={{ uri: 'https://img.freepik.com/free-photo/painting-mountain-lake-with-mountain-background_188544-9126.jpg?size=626&ext=jpg&ga=GA1.1.1413502914.1697414400&semt=ais' }}
-        style={styles.fotoPortada}
-      />
-      {/* Resto del contenido */}
+      {!!usuario.fotoPortada && (
+        <Image source={{ uri: usuario.fotoPortada }} style={styles.fotoPortada} />
+      )}
       <View style={styles.saldoContainer}>
         <Icon name="money" size={20} color="#000" style={styles.saldoIcono} />
         <Text style={styles.saldoValor}>{usuario.saldo}</Text>
@@ -93,8 +86,7 @@ const Configuracion = ({ navigation }) => {
       {opciones.map((item) => renderItem({ item }))}
     </ScrollView>
   );
-};
-
+      }
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,

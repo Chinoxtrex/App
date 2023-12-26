@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import { getFirestore, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import firebaseApp from '../firebaseConfig';
@@ -11,7 +11,6 @@ const SearchScreen = () => {
   const obtenerResultadosBusqueda = async () => {
     try {
       if (search.trim() === '') {
-        // Si no hay texto de búsqueda, muestra un mensaje o realiza otra acción según tu necesidad
         setSearchResults([]);
         return;
       }
@@ -43,7 +42,14 @@ const SearchScreen = () => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.resultItem}>
-      <Text style={styles.resultText}>{item.nombreUsuario}</Text>
+      <View style={styles.resultContainer}>
+        <Text style={styles.resultText}>{item.nombreUsuario}</Text>
+        {item.fotoPerfil && (
+          <View style={styles.profileImageContainer}>
+            <Image source={{ uri: item.fotoPerfil }} style={styles.profileImage} />
+          </View>
+        )}
+      </View>
     </TouchableOpacity>
   );
 
@@ -72,8 +78,25 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
+  resultContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   resultText: {
     fontSize: 16,
+  },
+  profileImageContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginLeft: 10,
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 20,
   },
 });
 
